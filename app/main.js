@@ -12,7 +12,7 @@ switch (command) {
   case "init":
     createGitDirectory();
     break;
-  case "read":
+  case "cat-file":
     readFile();
     break;
   default:
