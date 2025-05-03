@@ -44,5 +44,5 @@ function readFile() {
     )
   );
   const buffer = zlib.unzipSync(blob).toString();
-  process.stdout.write(buffer.substring.indexOf("\x00") + 1);
+  process.stdout.write(buffer.substring(buffer.indexOf("\x00") + 1));
 }
