@@ -34,36 +34,15 @@ function createGitDirectory() {
 }
 
 function readFile() {
-  try {
-    const objectHash = process.argv[4];
-    if (!objectHash || objectHash.length < 4) {
-      throw new Error("Invalid object hash provided.");
-    }
-
-    const objectPath = path.join(
+  const blob = fs.readFileSync(
+    path.join(
       process.cwd(),
       ".git",
       "objects",
-      objectHash.substring(0, 2),
-      objectHash.substring(2)
-    );
-
-    if (!fs.existsSync(objectPath)) {
-      throw new Error(`Git object not found at path: ${objectPath}`);
-    }
-
-    const blob = fs.readFileSync(objectPath);
-    const buffer = zlib.unzipSync(blob).toString();
-    const contentStartIndex = buffer.indexOf("\x00") + 1;
-
-    if (contentStartIndex <= 0) {
-      throw new Error("Invalid Git object format.");
-    }
-
-    const content = buffer.substring(contentStartIndex);
-    process.stdout.write(content);
-  } catch (error) {
-    console.error(`Error reading file: ${error.message}`);
-    process.exit(1);
-  }
+      process.argv[4].substring(0, 2),
+      process.argv[4].substring(2)
+    )
+  );
+  const buffer = zlib.unzipSync(blob).toString();
+  process.stdout.write(buffer.substring.indexOf("\x00") + 1);
 }
