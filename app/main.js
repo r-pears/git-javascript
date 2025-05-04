@@ -64,32 +64,45 @@ async function hashObject(arguments) {
   const filePath = arguments.at(-1);
 
   try {
-    const fullPath = path.resolve(__dirname, filePath);
+    // Resolve the file path relative to the current working directory
+    const fullPath = path.resolve(process.cwd(), filePath);
+
+    // Read the file content asynchronously
     const fileContent = await fs.promises.readFile(fullPath);
 
+    // Create the object buffer
     const objectBuffer = Buffer.from(
       `blob ${fileContent.length}\x00${fileContent.toString()}`
     );
 
+    // Compress the object buffer
     const blobData = zlib.deflateSync(objectBuffer);
+
+    // Generate the SHA-1 hash
     const hash = crypto.createHash("sha1").update(blobData).digest("hex");
 
+    // Extract folder and file names from the hash
     const objectFolder = hash.slice(0, 2);
     const objectFile = hash.slice(2);
 
+    // Create the folder path for the object
     const objectFolderPath = path.join(
-      __dirname,
+      process.cwd(),
       ".git",
       "objects",
       objectFolder
     );
 
+    // Ensure the folder exists
     await fs.promises.mkdir(objectFolderPath, { recursive: true });
+
+    // Write the compressed blob data to the file
     await fs.promises.writeFile(
       path.join(objectFolderPath, objectFile),
       blobData
     );
 
+    // Output the hash
     process.stdout.write(hash);
   } catch (error) {
     console.error("An error occurred:", error.message);
