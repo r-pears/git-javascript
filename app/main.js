@@ -61,22 +61,22 @@ function readFile() {
 }
 
 async function hashObject(arguments) {
-  try {
-    const filePath = arguments.at(-1);
-    const absoluteFilePath = path.resolve(__dirname, filePath);
+  const filePath = arguments.at(-1);
 
-    const fileContent = await fs.readFile(absoluteFilePath);
+  try {
+    const fullPath = path.resolve(__dirname, filePath);
+    const fileContent = await fs.promises.readFile(fullPath);
 
     const objectBuffer = Buffer.from(
       `blob ${fileContent.length}\x00${fileContent.toString()}`
     );
 
     const blobData = zlib.deflateSync(objectBuffer);
-
     const hash = crypto.createHash("sha1").update(blobData).digest("hex");
 
     const objectFolder = hash.slice(0, 2);
     const objectFile = hash.slice(2);
+
     const objectFolderPath = path.join(
       __dirname,
       ".git",
@@ -84,13 +84,15 @@ async function hashObject(arguments) {
       objectFolder
     );
 
-    await fs.mkdir(objectFolderPath, { recursive: true });
-
-    const objectFilePath = path.join(objectFolderPath, objectFile);
-    await fs.writeFile(objectFilePath, blobData);
+    await fs.promises.mkdir(objectFolderPath, { recursive: true });
+    await fs.promises.writeFile(
+      path.join(objectFolderPath, objectFile),
+      blobData
+    );
 
     process.stdout.write(hash);
   } catch (error) {
-    console.error("Error hashing object:", error.message);
+    console.error("An error occurred:", error.message);
+    process.exit(1);
   }
 }
