@@ -75,11 +75,11 @@ async function hashObject(arguments) {
       `blob ${fileContent.length}\x00${fileContent.toString()}`
     );
 
+    // Generate the SHA-1 hash (before compression)
+    const hash = crypto.createHash("sha1").update(objectBuffer).digest("hex");
+
     // Compress the object buffer
     const blobData = zlib.deflateSync(objectBuffer);
-
-    // Generate the SHA-1 hash
-    const hash = crypto.createHash("sha1").update(blobData).digest("hex");
 
     // Extract folder and file names from the hash
     const objectFolder = hash.slice(0, 2);
